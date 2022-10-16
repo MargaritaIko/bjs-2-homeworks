@@ -1,4 +1,4 @@
-// код для задачи №1
+// Задача №1
   'use strict'
 
 function solveEquation(a, b, c) {

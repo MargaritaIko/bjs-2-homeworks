@@ -1,48 +1,55 @@
+//Задача № 1
 function cachingDecoratorNew(func) {
   let cache = [];
-  function wrapper(...args) {
-    let hash = args.join(',');
-    let currentResult = cache.filter(cacheRecord => cacheRecord.hash === hash);
-    if (currentResult.length === 1) {
-        console.log('Из кэша: ' + currentResult[0].value);
-        return 'Из кэша: ' + currentResult[0].value;
-    } 
-    else {
-      let value = func.call(this, ...args);
-      console.log('Вычисляем: ' + value);
-      if (cache.length < 5) {   
-        cache.push({hash, value});
-      } 
-      else {
-        cache.unshift({hash, value});
-        cache.pop();
-      } 
-      return 'Вычисляем: ' + value;
+  const maxCacheValuesCount = 5;
+  return (...args) => {
+    const hash = args.join(",");
+    const objectFromCache = cache.find(object => object.hash === hash);
+    if (objectFromCache){
+      console.log("Из кэша: ", objectFromCache.value);
+      return "Из кэша: " + objectFromCache.value;
     }
+
+    const value = func(...args);
+    cache.push({hash, value})
+    if(cache.length > maxCacheValuesCount) {
+      cache.shift();
+    }
+
+    console.log("Вычисляем: ", value);
+      return "Вычисляем: " + value;
+  };
+}
+
+
+cache = [
+  { hash: "10,20,30", value: 1231 },
+  { hash: "2,2,2", value: 23423 },
+];
+
+//Задача № 2
+function debounceDecoratorNew(func, delay) {
+  let timeoutId = null;
+  wrapper.count = 0;
+  wrapper.allCount = 0;
+
+  function wrapper(...args) {
+    wrapper.allCount++;
+
+    if(timeoutId === null) {
+      func(...args);
+      wrapper.count++;
+    }
+
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      wrapper.count++;
+      func(...args);
+    }, delay);
   }
+
   return wrapper;
 }
 
-function debounceDecoratorNew(func, ms) {
-  let timeout;
-  func(...rest);
-  let flag = true;
-  return function (...rest) {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => {
-      if (!flag) {
-        func.call(this, ...rest); 
-        flag = true;
-      }
-    }, ms);
-  };   
-}
 
-function debounceDecorator2(debounceDecoratorNew) {
-  let count = 0;
-  function wrapper(...rest) {
-    wrapper.history = count++;
-    return debounceDecoratorNew.call(this, ...rest);
-  }
-  return wrapper;
-}
+
